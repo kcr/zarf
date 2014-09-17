@@ -11,6 +11,7 @@ class IRCClient(asyncio.Protocol):
         self.buffer = ''
         self.queue = asyncio.Queue()
         self.log = logging.getLogger('irc')
+        self.log.setLevel(logging.INFO)
         self.nick = 'kcr_test'
         self.username = 'kcr'
         self.name = 'Karl Ramm'
@@ -67,7 +68,7 @@ class IRCClient(asyncio.Protocol):
         yield from self.done
 
     def enqueue(self, k, v):
-        self.queue.put((k, v))
+        self.queue.put_nowait((k, v))
 
     def new_message(self):
         result = yield from self.queue.get()
@@ -100,7 +101,7 @@ class DumbUI:
         self.buffer += c.decode()#XXX
         while '\n' in self.buffer:
             line, self.buffer = self.buffer.split('\n')
-            asyncio.Task(self.line(line))
+            self.loop.create_task(self.line(line))
 
     @asyncio.coroutine
     def line(self, line):
@@ -119,6 +120,14 @@ class DumbUI:
 
 
 @asyncio.coroutine
+def output_thread(irc):
+    print('output thread')
+    while True:
+        message = yield from irc.new_message()
+        print(repr(message))
+
+
+@asyncio.coroutine
 def do_a_thing(loop):
     transport, protocol = yield from loop.create_connection(
         IRCClient, 'irc.oftc.net', 6697, ssl=True)
@@ -127,8 +136,12 @@ def do_a_thing(loop):
     ## yield from protocol.finished()
     logging.debug('client set up')
 
+    output = loop.create_task(output_thread(protocol))
+
     with DumbUI(loop, protocol) as ui:
         yield from ui.wait()
+
+    output.cancel()
 
     yield from asyncio.sleep(0)
 
