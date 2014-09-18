@@ -101,7 +101,7 @@ class DumbUI:
         self.buffer += c.decode()#XXX
         while '\n' in self.buffer:
             line, self.buffer = self.buffer.split('\n')
-            self.loop.create_task(self.line(line))
+            asyncio.async(self.line(line))
 
     @asyncio.coroutine
     def line(self, line):
