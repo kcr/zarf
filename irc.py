@@ -68,7 +68,7 @@ class IRCClient(asyncio.Protocol):
         yield from self.done
 
     def enqueue(self, k, v):
-        self.queue.put_nowait((k, v))
+        self.queue.put_nowait((self.transport._loop.time(), k, v))
 
     def new_message(self):
         result = yield from self.queue.get()
