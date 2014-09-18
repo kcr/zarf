@@ -12,9 +12,9 @@ class IRCClient(asyncio.Protocol):
         self.queue = asyncio.Queue()
         self.log = logging.getLogger('irc')
         self.log.setLevel(logging.INFO)
-        self.nick = 'kcr_test'
-        self.username = 'kcr'
-        self.name = 'Karl Ramm'
+        self.nick = 'Pi6aeXiz'
+        self.username = 'Aem8ohgh'
+        self.name = 'eiTh2sae'
         self.done = asyncio.Future()
 
     def connection_made(self, transport):
